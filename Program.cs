@@ -5,6 +5,7 @@ using Loans.Schedules.Kafka;
 using Loans.Schedules.Kafka.Consumers;
 using Loans.Schedules.Kafka.Events;
 using Loans.Schedules.Kafka.Handlers;
+using Loans.Schedules.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,8 @@ builder.Services.AddDbContext<SchedulesDbContext>(options => options.UseNpgsql(c
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
+
+builder.Services.AddScoped<IRepaymentCalculationService, RepaymentCalculationService>();
 builder.Services.AddScoped<IEventHandler<CalculateRepaymentScheduleEvent>, CalculateRepaymentScheduleHandler>();
 
 builder.Services.AddHostedService<CalculateRepaymentConsumer>();
@@ -33,7 +36,5 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-
 
 app.Run();
