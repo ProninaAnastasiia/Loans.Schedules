@@ -30,7 +30,7 @@ public class CalculateRepaymentScheduleHandler: IEventHandler<CalculateRepayment
             
             var @event = new RepaymentScheduleCalculatedEvent(contractEvent.ContractId, scheduleId.Result, contractEvent.OperationId);
             var jsonMessage = JsonConvert.SerializeObject(@event);
-            var topic = _config["Kafka:Topics:CalculateScheduleResult"];
+            var topic = _config["Kafka:Topics:CalculateRepaymentSchedule"];
     
             await _producer.PublishAsync(topic, jsonMessage);
             
