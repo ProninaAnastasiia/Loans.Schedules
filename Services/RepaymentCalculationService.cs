@@ -8,7 +8,6 @@ public class RepaymentCalculationService : IRepaymentCalculationService
 {
     private readonly IScheduleRepository _repository;
     private readonly ILogger<RepaymentCalculationService> _logger;
-    private IRepaymentCalculationService _repaymentCalculationServiceImplementation;
 
     public RepaymentCalculationService(IScheduleRepository repository, ILogger<RepaymentCalculationService> logger)
     {
@@ -16,8 +15,7 @@ public class RepaymentCalculationService : IRepaymentCalculationService
         _logger = logger;
     }
 
-    public async Task<Guid> CalculateRepaymentAsync(CalculateRepaymentScheduleEvent contractEvent,
-        CancellationToken cancellationToken)
+    public async Task<Guid> CalculateRepaymentAsync(CalculateRepaymentScheduleEvent contractEvent, CancellationToken cancellationToken)
     {
         var startDate = DateTime.UtcNow.Date.AddDays(10); // Можно потом заменить на дату из события
 

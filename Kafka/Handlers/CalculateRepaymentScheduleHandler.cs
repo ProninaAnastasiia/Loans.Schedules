@@ -7,15 +7,13 @@ namespace Loans.Schedules.Kafka.Handlers;
 
 public class CalculateRepaymentScheduleHandler: IEventHandler<CalculateRepaymentScheduleEvent>
 {
-    private readonly IScheduleRepository _repository;
     private readonly ILogger<CalculateRepaymentScheduleHandler> _logger;
     private readonly IRepaymentCalculationService _calculator;
     private readonly IConfiguration _config;
     private KafkaProducerService _producer;
     
-    public CalculateRepaymentScheduleHandler(IScheduleRepository repository, ILogger<CalculateRepaymentScheduleHandler> logger, IRepaymentCalculationService calculator,IConfiguration config, KafkaProducerService producer)
+    public CalculateRepaymentScheduleHandler(ILogger<CalculateRepaymentScheduleHandler> logger, IRepaymentCalculationService calculator,IConfiguration config, KafkaProducerService producer)
     {
-        _repository = repository;
         _logger = logger;
         _calculator = calculator;
         _config = config;

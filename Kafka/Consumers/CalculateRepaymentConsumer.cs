@@ -50,10 +50,6 @@ public class CalculateRepaymentConsumer: BackgroundService
                     var @event = jsonObject.ToObject<CalculateRepaymentScheduleEvent>();
                     if (@event != null) await ProcessCalculateRepaymentScheduleEventAsync(@event, stoppingToken);
                 }
-                else
-                {
-                    _logger.LogWarning("Неизвестный тип события: {Json}", result.Message.Value);
-                }
             }
         }
         catch (KafkaException ex)
