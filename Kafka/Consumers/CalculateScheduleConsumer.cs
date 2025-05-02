@@ -5,13 +5,13 @@ using Newtonsoft.Json.Linq;
 
 namespace Loans.Schedules.Kafka.Consumers;
 
-public class CalculateRepaymentConsumer: BackgroundService
+public class CalculateScheduleConsumer: BackgroundService
 {
     private readonly IConfiguration _configuration;
-    private readonly ILogger<CalculateRepaymentConsumer> _logger;
+    private readonly ILogger<CalculateScheduleConsumer> _logger;
     private readonly IServiceProvider _serviceProvider;
 
-    public CalculateRepaymentConsumer(IConfiguration configuration, IServiceProvider serviceProvider, ILogger<CalculateRepaymentConsumer> logger)
+    public CalculateScheduleConsumer(IConfiguration configuration, IServiceProvider serviceProvider, ILogger<CalculateScheduleConsumer> logger)
     {
         _configuration = configuration;
         _logger = logger;
@@ -29,7 +29,7 @@ public class CalculateRepaymentConsumer: BackgroundService
         };
 
         using var consumer = new ConsumerBuilder<Ignore, string>(consumerConfig).Build();
-        consumer.Subscribe(_configuration["Kafka:Topics:CalculateRepaymentSchedule"]);
+        consumer.Subscribe(_configuration["Kafka:Topics:CalculateContractValues"]);
 
         _logger.LogInformation("KafkaConsumerService CalculateRepaymentConsumer запущен.");
         
@@ -40,15 +40,14 @@ public class CalculateRepaymentConsumer: BackgroundService
                 var result = consumer.Consume(stoppingToken);
                 if (result == null) continue;
 
-                _logger.LogInformation("Получено сообщение из Kafka: {Message}", result.Message.Value);
-
                 var jsonObject = JObject.Parse(result.Message.Value);
 
                 // Определяем тип события по наличию определенных свойств
-                if (jsonObject.Property("EventType").Value.ToString().Contains("CalculateRepaymentScheduleEvent"))
+                if (jsonObject.Property("EventType").Value.ToString().Contains("CalculateContractValuesEvent"))
                 {
-                    var @event = jsonObject.ToObject<CalculateRepaymentScheduleEvent>();
-                    if (@event != null) await ProcessCalculateRepaymentScheduleEventAsync(@event, stoppingToken);
+                    _logger.LogInformation("Получено сообщение из Kafka: {Message}", result.Message.Value);
+                    var @event = jsonObject.ToObject<CalculateContractValuesEvent>();
+                    if (@event != null) await ProcessCalculateContractValuesEventAsync(@event, stoppingToken);
                 }
             }
         }
@@ -63,12 +62,12 @@ public class CalculateRepaymentConsumer: BackgroundService
         }
     }
     
-    private async Task ProcessCalculateRepaymentScheduleEventAsync(CalculateRepaymentScheduleEvent @event, CancellationToken cancellationToken)
+    private async Task ProcessCalculateContractValuesEventAsync(CalculateContractValuesEvent @event, CancellationToken cancellationToken)
     {
         try
         {
             using var scope = _serviceProvider.CreateScope();
-            var handler = scope.ServiceProvider.GetRequiredService<IEventHandler<CalculateRepaymentScheduleEvent>>();
+            var handler = scope.ServiceProvider.GetRequiredService<IEventHandler<CalculateContractValuesEvent>>();
             await handler.HandleAsync(@event, cancellationToken);
         }
         catch (Exception ex)

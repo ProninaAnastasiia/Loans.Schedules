@@ -1,5 +1,4 @@
 using Loans.Schedules.Data;
-using Loans.Schedules.Data.Mappers;
 using Loans.Schedules.Data.Repositories;
 using Loans.Schedules.Kafka;
 using Loans.Schedules.Kafka.Consumers;
@@ -13,14 +12,12 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("Postgres");
 builder.Services.AddDbContext<SchedulesDbContext>(options => options.UseNpgsql(connectionString));
 
-builder.Services.AddAutoMapper(typeof(MappingProfile));
-
 builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
 
-builder.Services.AddScoped<IRepaymentCalculationService, RepaymentCalculationService>();
-builder.Services.AddScoped<IEventHandler<CalculateRepaymentScheduleEvent>, CalculateRepaymentScheduleHandler>();
+builder.Services.AddScoped<IScheduleCalculationService, ScheduleCalculationService>();
+builder.Services.AddScoped<IEventHandler<CalculateContractValuesEvent>, CalculateContractValuesHandler>();
 
-builder.Services.AddHostedService<CalculateRepaymentConsumer>();
+builder.Services.AddHostedService<CalculateScheduleConsumer>();
 builder.Services.AddSingleton<KafkaProducerService>();
 
 

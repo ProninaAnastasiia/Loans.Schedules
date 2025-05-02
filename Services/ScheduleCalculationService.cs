@@ -4,18 +4,18 @@ using Loans.Schedules.Kafka.Events;
 
 namespace Loans.Schedules.Services;
 
-public class RepaymentCalculationService : IRepaymentCalculationService
+public class ScheduleCalculationService : IScheduleCalculationService
 {
     private readonly IScheduleRepository _repository;
-    private readonly ILogger<RepaymentCalculationService> _logger;
+    private readonly ILogger<ScheduleCalculationService> _logger;
 
-    public RepaymentCalculationService(IScheduleRepository repository, ILogger<RepaymentCalculationService> logger)
+    public ScheduleCalculationService(IScheduleRepository repository, ILogger<ScheduleCalculationService> logger)
     {
         _repository = repository;
         _logger = logger;
     }
 
-    public async Task<Guid> CalculateRepaymentAsync(CalculateRepaymentScheduleEvent contractEvent, CancellationToken cancellationToken)
+    public async Task<Guid> CalculateRepaymentAsync(CalculateContractValuesEvent contractEvent, CancellationToken cancellationToken)
     {
         var startDate = DateTime.UtcNow.Date.AddDays(10); // Можно потом заменить на дату из события
 
