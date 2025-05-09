@@ -66,6 +66,7 @@ public class CalculateScheduleConsumer: BackgroundService
     {
         try
         {
+            MetricsRegistry.StartTimer(@event.OperationId);
             using var scope = _serviceProvider.CreateScope();
             var handler = scope.ServiceProvider.GetRequiredService<IEventHandler<CalculateContractValuesEvent>>();
             await handler.HandleAsync(@event, cancellationToken);

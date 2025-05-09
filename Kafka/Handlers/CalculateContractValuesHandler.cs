@@ -31,6 +31,7 @@ public class CalculateContractValuesHandler: IEventHandler<CalculateContractValu
             var topic = _config["Kafka:Topics:CalculateContractValues"];
     
             await _producer.PublishAsync(topic, jsonMessage);
+            MetricsRegistry.StopTimer(@event.OperationId);
         }
         catch (Exception e)
         {
