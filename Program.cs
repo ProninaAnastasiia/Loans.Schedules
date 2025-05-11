@@ -20,7 +20,9 @@ builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
 
 builder.Services.AddScoped<IScheduleCalculationService, ScheduleCalculationService>();
 builder.Services.AddScoped<IEventHandler<CalculateContractValuesEvent>, CalculateContractValuesHandler>();
+builder.Services.AddScoped<IEventHandler<CalculateRepaymentScheduleEvent>, CalculateScheduleRequestedHandler>();
 
+builder.Services.AddHostedService<CalculateContractValuesConsumer>();
 builder.Services.AddHostedService<CalculateScheduleConsumer>();
 builder.Services.AddSingleton<KafkaProducerService>();
 

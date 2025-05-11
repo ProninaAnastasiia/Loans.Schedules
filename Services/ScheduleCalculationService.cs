@@ -15,7 +15,7 @@ public class ScheduleCalculationService : IScheduleCalculationService
         _logger = logger;
     }
 
-    public async Task<Guid> CalculateRepaymentAsync(CalculateContractValuesEvent contractEvent, CancellationToken cancellationToken)
+    public async Task<Guid> CalculateRepaymentAsync(Guid contractId, decimal loanAmount, int loanTermMonths, decimal interestRate, string paymentType, CancellationToken cancellationToken)
     {
         var startDate = DateTime.UtcNow.Date.AddDays(10); // Можно потом заменить на дату из события
 
@@ -23,18 +23,17 @@ public class ScheduleCalculationService : IScheduleCalculationService
         {
             ScheduleId = Guid.NewGuid(),
             CalculationDate = DateTime.UtcNow,
-            ContractId = contractEvent.ContractId
+            ContractId = contractId
         };
 
-        var loanAmount = contractEvent.LoanAmount;
-        var interestRate = contractEvent.InterestRate / 100m / 12; // месячная ставка
-        var months = contractEvent.LoanTermMonths;
+        var rate = interestRate / 100m / 12; // месячная ставка
+        var months = loanTermMonths;
 
-        if (contractEvent.PaymentType.Equals("аннуитет", StringComparison.OrdinalIgnoreCase))
+        if (paymentType.Equals("аннуитет", StringComparison.OrdinalIgnoreCase))
         {
             var annuityFactor = (decimal)(
-                (double)interestRate * Math.Pow(1 + (double)interestRate, months) /
-                (Math.Pow(1 + (double)interestRate, months) - 1)
+                (double)rate * Math.Pow(1 + (double)rate, months) /
+                (Math.Pow(1 + (double)rate, months) - 1)
             );
             var monthlyPayment = Math.Round(loanAmount * annuityFactor, 2);
 
@@ -42,7 +41,7 @@ public class ScheduleCalculationService : IScheduleCalculationService
 
             for (int i = 1; i <= months; i++)
             {
-                var interest = Math.Round(remaining * interestRate, 2);
+                var interest = Math.Round(remaining * rate, 2);
                 var principal = Math.Round(monthlyPayment - interest, 2);
                 remaining -= principal;
 
@@ -57,14 +56,14 @@ public class ScheduleCalculationService : IScheduleCalculationService
                 });
             }
         }
-        else if (contractEvent.PaymentType.Equals("дифференцированная", StringComparison.OrdinalIgnoreCase))
+        else if (paymentType.Equals("дифференцированная", StringComparison.OrdinalIgnoreCase))
         {
             var principalPart = Math.Round(loanAmount / months, 2);
             var remaining = loanAmount;
 
             for (int i = 1; i <= months; i++)
             {
-                var interest = Math.Round(remaining * interestRate, 2);
+                var interest = Math.Round(remaining * rate, 2);
                 var monthlyPayment = Math.Round(principalPart + interest, 2);
                 remaining -= principalPart;
 
@@ -81,8 +80,8 @@ public class ScheduleCalculationService : IScheduleCalculationService
         }
         else
         {
-            _logger.LogError("Неизвестный тип платежа: {PaymentType}", contractEvent.PaymentType);
-            throw new ArgumentException($"Тип платежа '{contractEvent.PaymentType}' не поддерживается");
+            _logger.LogError("Неизвестный тип платежа: {PaymentType}", paymentType);
+            throw new ArgumentException($"Тип платежа '{paymentType}' не поддерживается");
         }
 
         await _repository.SaveAsync(schedule);
